@@ -19,7 +19,7 @@ This package provides a way to easily visualize 4D NIfTI images by plotting the 
 For example, a command like:
 
 ```bash
-nii-plot -l -i '1:' -t 'Multi-delay PCASL' /path/to/nii/file.nii.gz
+nii-plot -i '1:' -t 'Multi-delay PCASL' /path/to/nii/file.nii.gz
 ```
 
 might yield something like:

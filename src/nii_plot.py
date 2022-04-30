@@ -170,7 +170,8 @@ def handler(ns: argparse.Namespace) -> int:
 
 
 def compute_mask(
-    img: nib.Nifti1Image, percentile: float = Defaults.percentile
+    img: nib.Nifti1Image,
+    percentile: float = Defaults.percentile,
 ) -> nib.Nifti1Image:
     data = img.get_fdata()
     if img.ndim == 4:
@@ -183,7 +184,9 @@ def compute_mask(
 
 
 def compute_means(
-    img: nib.Nifti1Image, mask_img: nib.Nifti1Image, indices: list[int] | None = None
+    img: nib.Nifti1Image,
+    mask_img: nib.Nifti1Image,
+    indices: list[int] | None = None,
 ) -> list[tuple[int, float]]:
     data = img.get_fdata()
     if data.ndim == 3:
@@ -191,7 +194,7 @@ def compute_means(
 
     mask = mask_img.get_fdata()
 
-    if indices == None:
+    if indices is None:
         indices = list(range(_get_nvols(img)))
 
     means = data[mask > 0, :][..., indices].mean(axis=0)  # type: ignore
@@ -229,7 +232,7 @@ def plot(
             if p2 is not None:
                 x1, y1 = p1
                 x2, y2 = p2
-                ax.plot([x1, x2], [y1, y2 ], c="C0")  # line connecting p1 and p2
+                ax.plot([x1, x2], [y1, y2], c="C0")  # line connecting p1 and p2
                 ax.scatter([x1, x2], [y1, y2], s=12, c="C0")  # scatter points p1 and p2
             else:
                 # just the point (xy is odd length, i.e. this is the last point)
@@ -243,7 +246,7 @@ def plot(
 
 digit_regex = re.compile(r"^\d+$")
 interval_regex = re.compile(
-    r"^(?P<start>\-?\d*)\:(?P<stop>\-?\d*)(:(?P<step>\-?\d*))?$"
+    r"^(?P<start>\-?\d*)\:(?P<stop>\-?\d*)(:(?P<step>\-?\d*))?$",
 )
 
 
