@@ -4,6 +4,7 @@ import argparse
 import re
 from enum import Enum
 from pathlib import Path
+from typing import Any
 from typing import Iterable
 from typing import Iterator
 from typing import NamedTuple
@@ -29,6 +30,7 @@ class Defaults:
     plot_type = PlotType.LINE
     percentile = 50.0
     index_spec = "::"
+    normalize = False
     title = None
     x_label = "Volume Index"
     y_label = None
@@ -85,6 +87,13 @@ def create_parser(
         "slicing (start:stop[:step]), for example, to plot the first "
         "volume, then the 10th and 11th volumes, then from the 16th to "
         "the end, we could write: '0,9:11,15:'. (default: %(default)r)",
+    )
+    parser.add_argument(
+        "-n",
+        "--normalize",
+        action="store_true",
+        default=Defaults.normalize,
+        help="Normalize the timeseries to the range [0, 1]",
     )
     plot_type_group = parser.add_mutually_exclusive_group()
     plot_type_group.add_argument(
@@ -144,6 +153,7 @@ def handler(ns: argparse.Namespace) -> int:
     mask_file: Path | None = ns.mask
     percentile: float = ns.percentile
     index_spec: str = ns.index_spec
+    should_normalize: str = ns.normalize
     plot_type: PlotType = ns.plot_type
     title: str | None = ns.title
     x_label: str | None = ns.x_label
@@ -157,6 +167,9 @@ def handler(ns: argparse.Namespace) -> int:
     nvols = _get_nvols(img)
     indices = parse_index_spec(index_spec, nvols)
     means = compute_means(img, mask_img, indices)
+    if should_normalize:
+        y_normed = _normalize([y for _, y in means])
+        means = [(x, y) for (x, _), y in zip(means, y_normed)]
     fig, ax = plot(
         means,
         plot_type=plot_type,
@@ -315,6 +328,11 @@ def pairwise(iterable: Iterable[T]) -> Iterator[tuple[T, T | None]]:
     for a in it:
         b = next(it, None)
         yield a, b
+
+
+def _normalize(x: Any) -> np.ndarray:
+    x = np.asarray(x)
+    return (x - x.min()) / (np.ptp(x))
 
 
 if __name__ == "__main__":
